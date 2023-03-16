@@ -638,7 +638,22 @@ function (op::Operator{:∫κᵢⱼMᵢⱼdΩ})(ap::T,k::AbstractMatrix{Float64}
         end
     end
 end
-
+function (op::Operator{:∫ρᵢⱼhᵢⱼdΩ})(ap::T,m::AbstractMatrix{Float64}) where T<:AbstractElement
+    𝓒 = ap.𝓒; 𝓖 = ap.𝓖
+    ρ = op.ρ
+    h = op.h
+    for ξ in 𝓖
+        𝑤 = ξ.𝑤
+        N = ξ[:𝝭]
+        for (i,xᵢ) in enumerate(𝓒)
+            I = xᵢ.𝐼
+            for (j,xⱼ) in enumerate(𝓒)
+                J = xⱼ.𝐼
+                m[I,J] += ρ*h*N[i]*N[j]*𝑤
+            end
+        end
+    end
+end
 function (op::Operator{:∫κ̃ᵢⱼM̃ᵢⱼdΩ})(ap::T,k::AbstractMatrix{Float64}) where T<:AbstractElement
     𝓒 = ap.𝓒; 𝓖 = ap.𝓖
     D = op.D
