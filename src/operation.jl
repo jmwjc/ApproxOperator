@@ -638,7 +638,7 @@ function (op::Operator{:∫κᵢⱼMᵢⱼdΩ})(ap::T,k::AbstractMatrix{Float64}
         end
     end
 end
-function (op::Operator{:∫ρᵢⱼhᵢⱼdΩ})(ap::T,m::AbstractMatrix{Float64}) where T<:AbstractElement
+function (op::Operator{:∫ρhvwdΩ})(ap::T,m::AbstractMatrix{Float64}) where T<:AbstractElement
     𝓒 = ap.𝓒; 𝓖 = ap.𝓖
     ρ = op.ρ
     h = op.h
