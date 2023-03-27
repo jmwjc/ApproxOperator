@@ -295,7 +295,9 @@ Basis function
 @inline get∂𝒑₁∂ξ(::ReproducingKernel{:Cubic1D},ξ::Float64) = (0.,1.0,(1.0-ξ))
 
 @inline get𝑛𝒑₂(::ReproducingKernel{:Cubic1D}) = 2
-@inline get𝒑₂(ap::ReproducingKernel{:Cubic1D},ξ::SNode) = get𝒑₁(ap,ξ.ξ)
+@inline get𝒑₂(ap::ReproducingKernel{:Cubic1D},ξ::SNode) = get𝒑₂(ap,ξ.ξ)
+@inline get∂𝒑₂∂ξ(ap::ReproducingKernel{:Cubic1D},ξ::SNode) = get∂𝒑₂∂ξ(ap,ξ.ξ)
+@inline get∂²𝒑₂∂ξ²(ap::ReproducingKernel{:Cubic1D},ξ::SNode) = get∂²𝒑₂∂ξ²(ap,ξ.ξ)
 @inline get𝒑₂(::ReproducingKernel{:Cubic1D},ξ::Float64) = (1.0,0.5*(1.0-ξ))
 @inline get∂𝒑₂∂ξ(::ReproducingKernel{:Cubic1D},ξ::Float64) = (0.0,-0.5)
 @inline get∂²𝒑₂∂ξ²(::ReproducingKernel{:Cubic1D},ξ::Float64) = (0.0,0.0)
@@ -712,30 +714,30 @@ function cal𝗠!(ap::ReproducingKernel,x::SNode)
     UUᵀ!(𝗠)
 end
 
-# function cal∇₁𝗠!(ap::ReproducingKernel,x::NTuple{3,Float64})
-#     𝓒 = ap.𝓒
-#     𝗠 = ap.𝗠[:∂1]
-#     ∂𝗠∂x = ap.𝗠[:∂x]
-#     n = get𝑛𝒑(ap)
-#     fill!(𝗠,0.)
-#     fill!(∂𝗠∂x,0.)
-#     for xᵢ in 𝓒
-#         Δx = x - xᵢ
-#         𝒑, ∂𝒑∂x = get∇₁𝒑(ap,Δx)
-#         𝜙, ∂𝜙∂x = get∇₁𝜙(ap,xᵢ,Δx)
-#         for I in 1:n
-#             for J in 1:I
-#                 𝗠[I,J] += 𝜙*𝒑[I]*𝒑[J]
-#                 ∂𝗠∂x[I,J] += ∂𝜙∂x*𝒑[I]*𝒑[J] + 𝜙*∂𝒑∂x[I]*𝒑[J] + 𝜙*𝒑[I]*∂𝒑∂x[J]
-#             end
-#         end
-#     end
-#     cholesky!(𝗠)
-#     U = inverse!(𝗠)
-#     ∂𝗠⁻¹∂x = - UUᵀAUUᵀ!(∂𝗠∂x,U)
-#     𝗠⁻¹ = UUᵀ!(U)
-#     return 𝗠⁻¹, ∂𝗠⁻¹∂x
-# end
+function cal∇₁𝗠!(ap::ReproducingKernel,x::SNode)
+    𝓒 = ap.𝓒
+    𝗠 = ap.𝗠[:𝝭]
+    ∂𝗠∂x = ap.𝗠[:∂𝝭∂x]
+    n = get𝑛𝒑(ap)
+    fill!(𝗠,0.)
+    fill!(∂𝗠∂x,0.)
+    for xᵢ in 𝓒
+        Δx = x - xᵢ
+        𝒑, ∂𝒑∂x = get∇𝒑(ap,Δx)
+        𝜙, ∂𝜙∂x = get∇𝜙(ap,xᵢ,Δx)
+        for I in 1:n
+            for J in 1:I
+                𝗠[I,J] += 𝜙*𝒑[I]*𝒑[J]
+                ∂𝗠∂x[I,J] += ∂𝜙∂x*𝒑[I]*𝒑[J] + 𝜙*∂𝒑∂x[I]*𝒑[J] + 𝜙*𝒑[I]*∂𝒑∂x[J]
+            end
+        end
+    end
+    cholesky!(𝗠)
+    U = inverse!(𝗠)
+    ∂𝗠⁻¹∂x = - UUᵀAUUᵀ!(∂𝗠∂x,U)
+    𝗠⁻¹ = UUᵀ!(U)
+    return 𝗠⁻¹, ∂𝗠⁻¹∂x
+end
 
 function cal∇₂𝗠!(ap::ReproducingKernel,x::SNode)
     𝓒 = ap.𝓒
@@ -1178,6 +1180,16 @@ function cal𝗚!(ap::ReproducingKernel{:Cubic1D,𝑠,𝜙,:Seg2}) where {𝑠,�
     return 𝗚⁻¹
 end
 
+function cal𝗚₂!(ap::ReproducingKernel{:Cubic1D,𝑠,𝜙,:Seg2}) where {𝑠,𝜙}
+    𝗚⁻¹ = ap.𝗠[:∇̃²]
+    fill!(𝗚⁻¹,0.0)
+    𝐿 = get𝐿(ap)
+    𝗚⁻¹[1] =  4.0/𝐿
+    𝗚⁻¹[2] = -6.0/𝐿
+    𝗚⁻¹[3] = 12.0/𝐿
+    return 𝗚⁻¹
+end
+
 function cal𝗚!(ap::ReproducingKernel{:Linear2D,𝑠,𝜙,:Tri3}) where {𝑠,𝜙}
     𝗚⁻¹ = ap.𝗠[:∇̃]
     fill!(𝗚⁻¹,0.0)
@@ -1426,11 +1438,11 @@ function set∇₁𝝭!(ap::ReproducingKernel,𝒙::SNode)
     𝓒 = ap.𝓒
     𝝭 = 𝒙[:𝝭]
     ∂𝝭∂x = 𝒙[:∂𝝭∂x]
-    𝒑₀ᵀ𝗠⁻¹, 𝒑₀ᵀ∂𝗠⁻¹∂x = cal∇𝗠!(ap,𝒙)
+    𝒑₀ᵀ𝗠⁻¹, 𝒑₀ᵀ∂𝗠⁻¹∂x = cal∇₁𝗠!(ap,𝒙)
     for (i,𝒙ᵢ) in enumerate(𝓒)
         Δ𝒙 = 𝒙 - 𝒙ᵢ
-        𝒑, ∂𝒑∂x, ∂𝒑∂y, ∂𝒑∂z = get∇𝒑(ap,Δ𝒙)
-        𝜙, ∂𝜙∂x, ∂𝜙∂y, ∂𝜙∂z = get∇𝜙(ap,𝒙ᵢ,Δ𝒙)
+        𝒑, ∂𝒑∂x = get∇𝒑(ap,Δ𝒙)
+        𝜙, ∂𝜙∂x = get∇𝜙(ap,𝒙ᵢ,Δ𝒙)
         𝝭[i] = 𝒑₀ᵀ𝗠⁻¹*𝒑*𝜙
         ∂𝝭∂x[i] = 𝒑₀ᵀ∂𝗠⁻¹∂x*𝒑*𝜙 + 𝒑₀ᵀ𝗠⁻¹*∂𝒑∂x*𝜙 + 𝒑₀ᵀ𝗠⁻¹*𝒑*∂𝜙∂x
     end
@@ -1762,18 +1774,22 @@ function set∇̃𝝭!(gp::ReproducingKernel{𝒑,𝑠,𝜙,:Tri3},ap::Reproduci
 end
 
 function set∇̃²𝝭!(gp::ReproducingKernel{𝒑,𝑠,𝜙,:Seg2},ap::ReproducingKernel{𝒑,𝑠,𝜙,:Seg2}) where {𝒑,𝑠,𝜙}
+    x₁ = ap.𝓒[1].x;y₁ = ap.𝓒[1].y
+    x₂ = ap.𝓒[2].x;y₂ = ap.𝓒[2].y
+    𝐿 = ((x₁-x₂)^2+(y₁-y₂)^2)^0.5
+    n₁ =  1.0
+    n₂ = -1.0
     𝓒 = gp.𝓒
     𝓖 = gp.𝓖
     for ξ̂ in 𝓖
-        𝒒̂ = get𝒑₁(gp,ξ̂)
-        𝗚⁻¹ = cal𝗚!(gp)
+        𝒒̂ = get𝒑₂(gp,ξ̂)
+        𝗚⁻¹ = cal𝗚₂!(gp)
         𝒒̂ᵀ𝗚⁻¹ = 𝒒̂*𝗚⁻¹
         ∂²𝝭∂x² = ξ̂[:∂²𝝭∂x²]
         for i in 1:length(𝓒)
             ∂²𝝭∂x²[i] = 0.0
         end
         for ξ in ap.𝓖
-            𝐿 = ξ.𝐿
             w = ξ.w/2
             wᵇ = ξ.wᵇ
             nᵇ₁ = 0.0
@@ -2651,7 +2667,7 @@ function set∇̄²𝝭!(ap::ReproducingKernel{𝒑,𝑠,𝜙,:Tri3};Γᵍ::Vect
     end
 end
 
-for set𝝭 in (:set𝝭!,:set∇𝝭!,:set∇₂𝝭!,:set∇²𝝭!,:set∇³𝝭!,:set∇̂³𝝭!,:set∇²₂𝝭!)
+for set𝝭 in (:set𝝭!,:set∇𝝭!,:set∇₁𝝭!,:set∇₂𝝭!,:set∇²𝝭!,:set∇³𝝭!,:set∇̂³𝝭!,:set∇²₂𝝭!)
     @eval begin
         function $set𝝭(aps::Vector{T}) where T<:ReproducingKernel
             for ap in aps
