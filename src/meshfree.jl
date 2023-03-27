@@ -226,6 +226,8 @@ Basis function
 @inline get∇³𝒑(ap::ReproducingKernel,x::Any) = get𝒑(ap,x), get∂𝒑∂x(ap,x), get∂𝒑∂y(ap,x), get∂²𝒑∂x²(ap,x), get∂²𝒑∂x∂y(ap,x), get∂²𝒑∂y²(ap,x), get∂³𝒑∂x³(ap,x), get∂³𝒑∂x²∂y(ap,x), get∂³𝒑∂x∂y²(ap,x), get∂³𝒑∂y³(ap,x)
 @inline get∇∇²𝒑(ap::ReproducingKernel,x::Any) = get𝒑(ap,x), get∂³𝒑∂x³(ap,x), get∂³𝒑∂x²∂y(ap,x), get∂³𝒑∂x²∂y(ap,x), get∂³𝒑∂x∂y²(ap,x), get∂³𝒑∂x∂y²(ap,x), get∂³𝒑∂y³(ap,x)
 @inline get∇𝒑₁(ap::ReproducingKernel{𝒑,𝑠,𝜙,:Seg2},ξ::Any) where {𝒑,𝑠,𝜙} = get𝒑₁(ap,ξ), get∂𝒑₁∂ξ(ap,ξ)
+@inline get∇𝒑₂(ap::ReproducingKernel{𝒑,𝑠,𝜙,:Seg2},ξ::Any) where {𝒑,𝑠,𝜙} = get𝒑₂(ap,ξ), get∂𝒑₂∂ξ(ap,ξ)
+@inline get∇²𝒑₂(ap::ReproducingKernel{𝒑,𝑠,𝜙,:Seg2},ξ::Any) where {𝒑,𝑠,𝜙} = get𝒑₂(ap,ξ), get∂𝒑₂∂ξ(ap,ξ), get∂²𝒑₂∂ξ²(ap,ξ)
 @inline get∇𝒑₁(ap::ReproducingKernel{𝒑,𝑠,𝜙,:Tri3},ξ::Any) where {𝒑,𝑠,𝜙} = get𝒑₁(ap,ξ), get∂𝒑₁∂ξ(ap,ξ), get∂𝒑₁∂η(ap,ξ)
 @inline get∇𝒑₂(ap::ReproducingKernel{𝒑,𝑠,𝜙,:Tri3},ξ::Any) where {𝒑,𝑠,𝜙} = get𝒑₂(ap,ξ), get∂𝒑₂∂ξ(ap,ξ), get∂𝒑₂∂η(ap,ξ)
 @inline get∇²𝒑₂(ap::ReproducingKernel{𝒑,𝑠,𝜙,:Tri3},ξ::Any) where {𝒑,𝑠,𝜙} = get𝒑₂(ap,ξ), get∂𝒑₂∂ξ(ap,ξ), get∂𝒑₂∂η(ap,ξ), get∂²𝒑₂∂ξ²(ap,ξ), get∂²𝒑₂∂ξ∂η(ap,ξ), get∂²𝒑₂∂η²(ap,ξ)
@@ -291,6 +293,12 @@ Basis function
 @inline get𝒑₁(::ReproducingKernel{:Cubic1D},ξ::Float64) = (1.0,0.5*(1.0-ξ),0.25*(1.0-ξ)^2)
 @inline get∂𝒑₁∂ξ(ap::ReproducingKernel{:Cubic1D},ξ::SNode) = get∂𝒑₁∂ξ(ap,ξ.ξ)
 @inline get∂𝒑₁∂ξ(::ReproducingKernel{:Cubic1D},ξ::Float64) = (0.,1.0,(1.0-ξ))
+
+@inline get𝑛𝒑₂(::ReproducingKernel{:Cubic1D}) = 2
+@inline get𝒑₂(ap::ReproducingKernel{:Cubic1D},ξ::SNode) = get𝒑₁(ap,ξ.ξ)
+@inline get𝒑₂(::ReproducingKernel{:Cubic1D},ξ::Float64) = (1.0,0.5*(1.0-ξ))
+@inline get∂𝒑₂∂ξ(::ReproducingKernel{:Cubic1D},ξ::Float64) = (0.0,-0.5)
+@inline get∂²𝒑₂∂ξ²(::ReproducingKernel{:Cubic1D},ξ::Float64) = (0.0,0.0)
 
 # ------------ Linear2D ---------------
 @inline get𝑛𝒑(::ReproducingKernel{:Linear2D}) = 3
@@ -1414,6 +1422,20 @@ function set∇𝝭!(ap::ReproducingKernel,𝒙::SNode)
     end
 end
 
+function set∇₁𝝭!(ap::ReproducingKernel,𝒙::SNode)
+    𝓒 = ap.𝓒
+    𝝭 = 𝒙[:𝝭]
+    ∂𝝭∂x = 𝒙[:∂𝝭∂x]
+    𝒑₀ᵀ𝗠⁻¹, 𝒑₀ᵀ∂𝗠⁻¹∂x = cal∇𝗠!(ap,𝒙)
+    for (i,𝒙ᵢ) in enumerate(𝓒)
+        Δ𝒙 = 𝒙 - 𝒙ᵢ
+        𝒑, ∂𝒑∂x, ∂𝒑∂y, ∂𝒑∂z = get∇𝒑(ap,Δ𝒙)
+        𝜙, ∂𝜙∂x, ∂𝜙∂y, ∂𝜙∂z = get∇𝜙(ap,𝒙ᵢ,Δ𝒙)
+        𝝭[i] = 𝒑₀ᵀ𝗠⁻¹*𝒑*𝜙
+        ∂𝝭∂x[i] = 𝒑₀ᵀ∂𝗠⁻¹∂x*𝒑*𝜙 + 𝒑₀ᵀ𝗠⁻¹*∂𝒑∂x*𝜙 + 𝒑₀ᵀ𝗠⁻¹*𝒑*∂𝜙∂x
+    end
+end
+
 function set∇₂𝝭!(ap::ReproducingKernel,𝒙::SNode)
     𝓒 = ap.𝓒
     𝝭 = 𝒙[:𝝭]
@@ -1674,7 +1696,7 @@ function set∇̃𝝭!(gp::ReproducingKernel{𝒑,𝑠,𝜙,:Seg2},ap::Reproduci
     𝓒 = gp.𝓒
     𝓖 = gp.𝓖
     for ξ̂ in 𝓖
-        𝒒̂ = get𝒒(gp,ξ̂)
+        𝒒̂ = get𝒑₁(gp,ξ̂)
         𝗚⁻¹ = cal𝗚!(gp)
         𝒒̂ᵀ𝗚⁻¹ = 𝒒̂*𝗚⁻¹
         ∂𝝭∂x = ξ̂[:∂𝝭∂x]
@@ -1688,7 +1710,7 @@ function set∇̃𝝭!(gp::ReproducingKernel{𝒑,𝑠,𝜙,:Seg2},ap::Reproduci
             nᵇ₁ += ξ.ξ ==  1.0 ? n₁ : 0.0
             nᵇ₁ += ξ.ξ == -1.0 ? n₂ : 0.0
             𝝭 = ξ[:𝝭]
-            𝒒, ∂𝒒∂ξ = get∇𝒒(gp,ξ)
+            𝒒, ∂𝒒∂ξ = get∇𝒑₁(gp,ξ)
             W₁ = 𝒒̂ᵀ𝗚⁻¹*𝒒*nᵇ₁*wᵇ + 𝒒̂ᵀ𝗚⁻¹*∂𝒒∂ξ*n₁*w
             for i in 1:length(𝓒)
                 ∂𝝭∂x[i] += 𝝭[i]*W₁
@@ -1734,6 +1756,36 @@ function set∇̃𝝭!(gp::ReproducingKernel{𝒑,𝑠,𝜙,:Tri3},ap::Reproduci
             for i in 1:length(𝓒)
                 ∂𝝭∂x[i] += 𝝭[i]*W₁
                 ∂𝝭∂y[i] += 𝝭[i]*W₂
+            end
+        end
+    end
+end
+
+function set∇̃²𝝭!(gp::ReproducingKernel{𝒑,𝑠,𝜙,:Seg2},ap::ReproducingKernel{𝒑,𝑠,𝜙,:Seg2}) where {𝒑,𝑠,𝜙}
+    𝓒 = gp.𝓒
+    𝓖 = gp.𝓖
+    for ξ̂ in 𝓖
+        𝒒̂ = get𝒑₁(gp,ξ̂)
+        𝗚⁻¹ = cal𝗚!(gp)
+        𝒒̂ᵀ𝗚⁻¹ = 𝒒̂*𝗚⁻¹
+        ∂²𝝭∂x² = ξ̂[:∂²𝝭∂x²]
+        for i in 1:length(𝓒)
+            ∂²𝝭∂x²[i] = 0.0
+        end
+        for ξ in ap.𝓖
+            𝐿 = ξ.𝐿
+            w = ξ.w/2
+            wᵇ = ξ.wᵇ
+            nᵇ₁ = 0.0
+            nᵇ₁ += ξ.ξ ==  1.0 ? n₁ : 0.0
+            nᵇ₁ += ξ.ξ == -1.0 ? n₂ : 0.0
+            𝝭 = ξ[:𝝭]
+            ∂𝝭∂x = ξ[:∂𝝭∂x]
+            𝒒, ∂𝒒∂ξ, ∂²𝒒∂ξ² = get∇²𝒑₂(gp,ξ)
+            W₁ = (𝒒̂ᵀ𝗚⁻¹*∂𝒒∂ξ*nᵇ₁*wᵇ + 𝒒̂ᵀ𝗚⁻¹*∂²𝒒∂ξ²*w)/𝐿 
+            W₁₁ = 𝒒̂ᵀ𝗚⁻¹*𝒒*nᵇ₁*wᵇ
+            for i in 1:length(𝓒)
+                ∂²𝝭∂x²[i] += 𝝭[i]*W₁ + ∂𝝭∂x[i]*W₁₁
             end
         end
     end

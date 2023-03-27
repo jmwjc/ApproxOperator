@@ -33,7 +33,7 @@ function set𝓖!(as::Vector{T},bs::Vector{S}) where {T<:AbstractElement{:Seg2},
     for b in bs
         for a in as
             g = findfirst(x->x.𝐼==b.𝓒[1].𝐼, a.𝓒)
-            if i ≠ nothing && i ≤ 2
+            if g ≠ nothing && g ≤ 2
                 G += 1
                 push!(a.𝓖,SNode((g,G,s),data))
                 s += length(a.𝓒)
