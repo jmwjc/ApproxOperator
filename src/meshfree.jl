@@ -296,11 +296,9 @@ Basis function
 
 @inline get𝑛𝒑₂(::ReproducingKernel{:Cubic1D}) = 2
 @inline get𝒑₂(ap::ReproducingKernel{:Cubic1D},ξ::SNode) = get𝒑₂(ap,ξ.ξ)
-@inline get∂𝒑₂∂ξ(ap::ReproducingKernel{:Cubic1D},ξ::SNode) = get∂𝒑₂∂ξ(ap,ξ.ξ)
-@inline get∂²𝒑₂∂ξ²(ap::ReproducingKernel{:Cubic1D},ξ::SNode) = get∂²𝒑₂∂ξ²(ap,ξ.ξ)
 @inline get𝒑₂(::ReproducingKernel{:Cubic1D},ξ::Float64) = (1.0,0.5*(1.0-ξ))
-@inline get∂𝒑₂∂ξ(::ReproducingKernel{:Cubic1D},ξ::Float64) = (0.0,-0.5)
-@inline get∂²𝒑₂∂ξ²(::ReproducingKernel{:Cubic1D},ξ::Float64) = (0.0,0.0)
+@inline get∂𝒑₂∂ξ(::ReproducingKernel{:Cubic1D},ξ::Any) = (0.0,1.0)
+@inline get∂²𝒑₂∂ξ²(::ReproducingKernel{:Cubic1D},ξ::Any) = (0.0,0.0)
 
 # ------------ Linear2D ---------------
 @inline get𝑛𝒑(::ReproducingKernel{:Linear2D}) = 3
