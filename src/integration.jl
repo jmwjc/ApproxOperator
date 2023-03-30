@@ -27,7 +27,14 @@ function set𝓖!(aps::Vector{T},s::Symbol,fs::Symbol...) where T<:AbstractEleme
 end
 
 function set𝓖!(as::Vector{T},bs::Vector{S}) where {T<:AbstractElement{:Seg2},S<:AbstractElement{:Poi1}}
-    data = Dict([:ξ=>(1,[-1.0,1.0]),:w=>(1,[1.0,1.0])])
+    nₑ = 0
+    for b in bs
+        for a in as
+            g = findfirst(x->x.𝐼==b.𝓒[1].𝐼, a.𝓒)
+            g ≠ nothing && g ≤ 2 ? nₑ += 1 : nothing
+        end
+    end
+    data = Dict([:ξ=>(1,[-1.0,1.0]),:w=>(1,[1.0,1.0]),:x=>(2,zeros(nₑ)),:y=>(2,zeros(nₑ)),:z=>(2,zeros(nₑ)),:n₁=>(2,zeros(nₑ))])
     s = 0
     G = 0
     for b in bs
@@ -35,7 +42,12 @@ function set𝓖!(as::Vector{T},bs::Vector{S}) where {T<:AbstractElement{:Seg2},
             g = findfirst(x->x.𝐼==b.𝓒[1].𝐼, a.𝓒)
             if g ≠ nothing && g ≤ 2
                 G += 1
-                push!(a.𝓖,SNode((g,G,s),data))
+                ξ = SNode((g,G,s),data)
+                ξ.x = a.𝓒[g].x
+                ξ.y = a.𝓒[g].y
+                ξ.z = a.𝓒[g].z
+                ξ.n₁ = g == 1 ? -1.0 : 1.0
+                push!(a.𝓖,ξ)
                 s += length(a.𝓒)
             end
         end

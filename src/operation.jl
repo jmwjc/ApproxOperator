@@ -997,6 +997,33 @@ function (op::Operator{:∫κMdx})(ap::T,k::AbstractMatrix{Float64}) where T<:Ab
         end
     end
 end
+
+function (op::Operator{:Ṽg})(ap::T,k::AbstractMatrix{Float64},f::AbstractVector{Float64}) where T<:AbstractElement
+    𝓒 = ap.𝓒; 𝓖 = ap.𝓖
+    EI = op.EI
+    ξ = 𝓖[1]
+    n₁ = ξ.n₁
+    N = ξ[:𝝭]
+    B = ξ[:∂∂²𝝭∂x²∂x]
+    B̄ = ξ[:∂∂²𝝭∂x²∂x_]
+    g = ξ.g
+    for (i,xᵢ) in enumerate(𝓒)
+        I = xᵢ.𝐼
+        Vᵢ = -EI*B[i]*n₁
+        V̄ᵢ = -EI*B̄[i]*n₁
+        for (j,xⱼ) in enumerate(𝓒)
+            J = xⱼ.𝐼
+            Vⱼ = -EI*B[j]*n₁
+            k[I,J] -= (Vᵢ*N[j]+N[i]*Vⱼ-V̄ᵢ*N[j])
+            # k[I,J] -= Vᵢ*N[j]+N[i]*Vⱼ
+            # k[I,J] += Vᵢ*N[j]+N[i]*Vⱼ
+            # k[I,J] += V̄ᵢ*N[j]
+        end
+        f[I] -= (Vᵢ-V̄ᵢ)*g
+        # f[I] -= Vᵢ*g
+        # f[I] += V̄ᵢ*g
+    end
+end
 """
 Phase field modeling fracture
 """
