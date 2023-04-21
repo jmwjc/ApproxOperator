@@ -302,7 +302,7 @@ Basis function
 
 
 # ------------ Quartic1D ---------------
-@inline get𝑛𝒑(::ReproducingKernel{:QuarticD}) = 5
+@inline get𝑛𝒑(::ReproducingKernel{:Quartic1D}) = 5
 @inline get𝒑(::ReproducingKernel{:Quartic1D},x::NTuple{3,Float64}) = (1.,x[1],x[1]^2,x[1]^3,x[1]^4)
 @inline get∂𝒑∂x(::ReproducingKernel{:Quartic1D},x::NTuple{3,Float64}) = (0.,1.,2*x[1],3*x[1]^2,4*x[1]^3)
 @inline get∂𝒑∂y(::ReproducingKernel{:Quartic1D}, ::Any) = (0.,0.,0.,0.,0.)
@@ -327,7 +327,8 @@ Basis function
 @inline get𝑛𝒑₂(::ReproducingKernel{:Quartic1D}) = 3
 @inline get𝒑₂(ap::ReproducingKernel{:Quartic1D},ξ::SNode) = get𝒑₂(ap,ξ.ξ)
 @inline get𝒑₂(::ReproducingKernel{:Quartic1D},ξ::Float64) =  (1.0,0.5*(1.0-ξ),0.25*(1.0-ξ)^2)
-@inline get∂𝒑₂∂ξ(::ReproducingKernel{:Quartic1D},ξ::Any) = (0.0,1.0,(1.0-ξ))
+@inline get∂𝒑₂∂ξ(ap::ReproducingKernel{:Quartic1D},ξ::SNode) = get∂𝒑₂∂ξ(ap,ξ.ξ)
+@inline get∂𝒑₂∂ξ(::ReproducingKernel{:Quartic1D},ξ::Float64) = (0.0,1.0,(1.0-ξ))
 @inline get∂²𝒑₂∂ξ²(::ReproducingKernel{:Quartic1D},ξ::Any) = (0.0,0.0,2.0)
 
 @inline get𝑛𝒑₃(::ReproducingKernel{:Quartic1D}) = 2
@@ -1244,6 +1245,40 @@ function cal∇𝗚₂!(ap::ReproducingKernel{:Cubic1D,𝑠,𝜙,:Seg2}) where {
     𝗚⁻¹∂ξ[1] =  4.0/𝐿
     𝗚⁻¹∂ξ[2] = -6.0/𝐿
     𝗚⁻¹∂ξ[3] = 12.0/𝐿
+    return 𝗚⁻¹, 𝗚⁻¹∂ξ
+end
+
+function cal𝗚₂!(ap::ReproducingKernel{:Quartic1D,𝑠,𝜙,:Seg2}) where {𝑠,𝜙}
+    𝗚⁻¹ = ap.𝗠[:∇̃²]
+    fill!(𝗚⁻¹,0.0)
+    𝐿 = get𝐿(ap)
+    𝗚⁻¹[1] =    9.0/𝐿
+    𝗚⁻¹[2] =  -36.0/𝐿
+    𝗚⁻¹[3] =  192.0/𝐿
+    𝗚⁻¹[4] =   30.0/𝐿
+    𝗚⁻¹[5] = -180.0/𝐿
+    𝗚⁻¹[6] =  180.0/𝐿
+    return 𝗚⁻¹
+end
+
+function cal∇𝗚₂!(ap::ReproducingKernel{:Quartic1D,𝑠,𝜙,:Seg2}) where {𝑠,𝜙}
+    𝗚⁻¹ = ap.𝗠[:∇̃²]
+    𝗚⁻¹∂ξ = ap.𝗠[:∂∇̃²∂ξ]
+    fill!(𝗚⁻¹,0.0)
+    fill!(𝗚⁻¹∂ξ,0.0)
+    𝐿 = get𝐿(ap)
+    𝗚⁻¹[1] =    9.0/𝐿
+    𝗚⁻¹[2] =  -36.0/𝐿
+    𝗚⁻¹[3] =  192.0/𝐿
+    𝗚⁻¹[4] =   30.0/𝐿
+    𝗚⁻¹[5] = -180.0/𝐿
+    𝗚⁻¹[6] =  180.0/𝐿
+    𝗚⁻¹∂ξ[1] =  9.0/𝐿
+    𝗚⁻¹∂ξ[2] = -36.0/𝐿
+    𝗚⁻¹∂ξ[3] = 192.0/𝐿
+    𝗚⁻¹∂ξ[4] =  30.0/𝐿
+    𝗚⁻¹∂ξ[5] = -180.0/𝐿
+    𝗚⁻¹∂ξ[6] = 180.0/𝐿
     return 𝗚⁻¹, 𝗚⁻¹∂ξ
 end
 
