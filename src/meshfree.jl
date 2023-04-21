@@ -308,27 +308,27 @@ Basis function
 @inline get∂𝒑∂y(::ReproducingKernel{:Quartic1D}, ::Any) = (0.,0.,0.,0.,0.)
 @inline get∂𝒑∂z(::ReproducingKernel{:Quartic1D}, ::Any) = (0.,0.,0.,0.,0.)
 @inline get∂²𝒑∂x²(::ReproducingKernel{:Quartic1D},x::NTuple{3,Float64}) = (0.,0.,2.,6*x[1],12*x[1]^2)
-@inline get∂²𝒑∂y²(::ReproducingKernel{:Quartic1D},x::NTuple{3,Float64}) = (0.,0.,0.,0.,0.)
-@inline get∂²𝒑∂z²(::ReproducingKernel{:Quartic1D},x::NTuple{3,Float64}) = (0.,0.,0.,0.,0.)
-@inline get∂²𝒑∂x∂y(::ReproducingKernel{:Quartic1D},x::NTuple{3,Float64}) = (0.,0.,0.,0.,0.)
-@inline get∂²𝒑∂x∂z(::ReproducingKernel{:Quartic1D},x::NTuple{3,Float64}) = (0.,0.,0.,0.,0.)
-@inline get∂²𝒑∂y∂z(::ReproducingKernel{:Quartic1D},x::NTuple{3,Float64}) = (0.,0.,0.,0..0.)
+@inline get∂²𝒑∂y²(::ReproducingKernel{:Quartic1D},x::Any) = (0.,0.,0.,0.,0.)
+@inline get∂²𝒑∂z²(::ReproducingKernel{:Quartic1D},x::Any) = (0.,0.,0.,0.,0.)
+@inline get∂²𝒑∂x∂y(::ReproducingKernel{:Quartic1D},x::Any) = (0.,0.,0.,0.,0.)
+@inline get∂²𝒑∂x∂z(::ReproducingKernel{:Quartic1D},x::Any) = (0.,0.,0.,0.,0.)
+@inline get∂²𝒑∂y∂z(::ReproducingKernel{:Quartic1D},x::Any) = (0.,0.,0.,0..0.)
 @inline get∂³𝒑∂x³(::ReproducingKernel{:Quartic1D},x::NTuple{3,Float64}) = (0.,0.,0.,6.,24*x[1])
-@inline get∂³𝒑∂x²∂y(::ReproducingKernel{:Quartic1D},x::NTuple{3,Float64}) = (0.,0.,0.,0.,0.)
-@inline get∂³𝒑∂x∂y²(::ReproducingKernel{:Quartic1D},x::NTuple{3,Float64}) = (0.,0.,0.,0.,0.)
-@inline get∂³𝒑∂y³(::ReproducingKernel{:Quartic1D},x::NTuple{3,Float64}) = (0.,0.,0.,0.,0.)
+@inline get∂³𝒑∂x²∂y(::ReproducingKernel{:Quartic1D},x::Any) = (0.,0.,0.,0.,0.)
+@inline get∂³𝒑∂x∂y²(::ReproducingKernel{:Quartic1D},x::Any) = (0.,0.,0.,0.,0.)
+@inline get∂³𝒑∂y³(::ReproducingKernel{:Quartic1D},x::Any) = (0.,0.,0.,0.,0.)
 
 @inline get𝑛𝒑₁(::ReproducingKernel{:Quartic1D}) = 4
 @inline get𝒑₁(ap::ReproducingKernel{:Quartic1D},ξ::SNode) = get𝒑₁(ap,ξ.ξ)
-@inline get𝒑₁(::ReproducingKernel{:Quartic1D},ξ::Float64) = (1.0,0.5*(1.0-ξ),0.25*(1.0-ξ)^2,0.125*(1.0ξ)^3)
+@inline get𝒑₁(::ReproducingKernel{:Quartic1D},ξ::Float64) = (1.0,0.5*(1.0-ξ),0.25*(1.0-ξ)^2,0.125*(1.0-ξ)^3)
 @inline get∂𝒑₁∂ξ(ap::ReproducingKernel{:Quartic1D},ξ::SNode) = get∂𝒑₁∂ξ(ap,ξ.ξ)
-@inline get∂𝒑₁∂ξ(::ReproducingKernel{:Quartic1D},ξ::Float64) = (0.,1.0,(1.0-ξ))
+@inline get∂𝒑₁∂ξ(::ReproducingKernel{:Quartic1D},ξ::Float64) = (0.,1.0,(1.0-ξ),0.75*(1-ξ)^2)
 
 @inline get𝑛𝒑₂(::ReproducingKernel{:Quartic1D}) = 3
 @inline get𝒑₂(ap::ReproducingKernel{:Quartic1D},ξ::SNode) = get𝒑₂(ap,ξ.ξ)
 @inline get𝒑₂(::ReproducingKernel{:Quartic1D},ξ::Float64) =  (1.0,0.5*(1.0-ξ),0.25*(1.0-ξ)^2)
 @inline get∂𝒑₂∂ξ(::ReproducingKernel{:Quartic1D},ξ::Any) = (0.0,1.0,(1.0-ξ))
-@inline get∂²𝒑₂∂ξ²(::ReproducingKernel{:Quartic1D},ξ::Any) = (0.0,0.0)
+@inline get∂²𝒑₂∂ξ²(::ReproducingKernel{:Quartic1D},ξ::Any) = (0.0,0.0,2.0)
 
 @inline get𝑛𝒑₃(::ReproducingKernel{:Quartic1D}) = 2
 @inline get𝒑₃(ap::ReproducingKernel{:Quartic1D},ξ::SNode) = get𝒑₃(ap,ξ.ξ)
