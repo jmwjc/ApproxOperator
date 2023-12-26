@@ -54,3 +54,96 @@ function (op::Operator{:∫κεγds})(ap::T;k::AbstractMatrix{Float64}) where T<
         end
     end
 end
+
+function (op::Operator{:∫κMds})(ap::T;k::AbstractMatrix{Float64}) where T<:AbstractElement
+    𝓒 = ap.𝓒; 𝓖 = ap.𝓖
+    EI = op.EI
+    for ξ in 𝓖
+        𝑤 = ξ.𝑤
+        B = ξ[:∂𝝭∂x]
+        for (i,xᵢ) in enumerate(𝓒)
+            I = xᵢ.𝐼
+            for (j,xⱼ) in enumerate(𝓒)
+                J = xⱼ.𝐼
+                k[3*I,3*J] += B[i]*EI*B[j]*𝑤
+            end
+        end
+    end
+end
+
+function (op::Operator{:∫εNds})(apu::T,apn::S;k::AbstractMatrix{Float64}) where {T<:AbstractElement,S<:AbstractElement}
+    𝓒u = apu.𝓒
+    𝓒n = apn.𝓒
+    𝓖u = apu.𝓖
+    𝓖n = apn.𝓖
+    R = op.R
+    for (ξu,ξn) in zip(𝓖u,𝓖n)
+        N₁ = ξu[:𝝭]
+        N₂ = ξn[:𝝭] 
+        B = ξu[:∂𝝭∂x]
+        𝑤 = ξu.𝑤
+        for (i,xᵢ) in enumerate(𝓒u)
+            I = xᵢ.𝐼
+            for (j,xⱼ) in enumerate(𝓒n)
+                J = xⱼ.𝐼
+                k[3*I-2,J] += B[i]*N₂[j]*𝑤
+                k[3*I-1,J] -= N₁[i]*N₂[j]/R*𝑤
+            end
+        end
+    end
+end
+
+function (op::Operator{:∫γVds})(apu::T,apn::S;k::AbstractMatrix{Float64}) where {T<:AbstractElement,S<:AbstractElement}
+    𝓒u = apu.𝓒
+    𝓒v = apn.𝓒
+    𝓖u = apu.𝓖
+    𝓖v = apn.𝓖
+    R = op.R
+    for (ξu,ξv) in zip(𝓖u,𝓖v)
+        N₁ = ξu[:𝝭]
+        N₂ = ξv[:𝝭]
+        B = ξu[:∂𝝭∂x]
+        𝑤 = ξu.𝑤
+        for (i,xᵢ) in enumerate(𝓒u)
+            I = xᵢ.𝐼
+            for (j,xⱼ) in enumerate(𝓒v)
+                J = xⱼ.𝐼
+                k[3*I-2,J] += N₁[i]*N₂[j]/R*𝑤
+                k[3*I-1,J] += B[i]*N₂[j]*𝑤
+                k[3*I,J]   -= N₁[i]*N₂[j]*𝑤
+            end
+        end
+    end
+end
+
+function (op::Operator{:∫nNds})(ap::T;k::AbstractMatrix{Float64}) where T<:AbstractElement
+    𝓒 = ap.𝓒; 𝓖 = ap.𝓖
+    EA = op.EA
+    for ξ in 𝓖
+        𝑤 = ξ.𝑤
+        N = ξ[:𝝭]
+        for (i,xᵢ) in enumerate(𝓒)
+            I = xᵢ.𝐼
+            for (j,xⱼ) in enumerate(𝓒)
+                J = xⱼ.𝐼
+                k[I,J] -= N[i]*N[j]/EA*𝑤
+            end
+        end
+    end
+end
+
+function (op::Operator{:∫vVds})(ap::T;k::AbstractMatrix{Float64}) where T<:AbstractElement
+    𝓒 = ap.𝓒; 𝓖 = ap.𝓖
+    kGA = op.kGA
+    for ξ in 𝓖
+        𝑤 = ξ.𝑤
+        N = ξ[:𝝭]
+        for (i,xᵢ) in enumerate(𝓒)
+            I = xᵢ.𝐼
+            for (j,xⱼ) in enumerate(𝓒)
+                J = xⱼ.𝐼
+                k[I,J] -= N[i]*N[j]/kGA*𝑤
+            end
+        end
+    end
+end
