@@ -118,14 +118,13 @@ function (op::Operator{:∫vgdΓ})(ap::T;k::AbstractMatrix{Float64},f::AbstractV
     for ξ in 𝓖
         𝑤 = ξ.𝑤
         N = ξ[:𝝭]
-        g = ξ.g
         for (i,xᵢ) in enumerate(𝓒)
             I = xᵢ.𝐼
             for (j,xⱼ) in enumerate(𝓒)
                 J = xⱼ.𝐼
                 k[I,J] += α*N[i]*N[j]*𝑤
             end
-            f[I] += α*N[i]*g*𝑤
+            f[I] += α*N[i]*0.0*𝑤
         end
     end
 end
