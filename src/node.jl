@@ -20,6 +20,8 @@ struct Node{T,N}
     index::NTuple{N,Int}
     data::Dict{Symbol,Tuple{Int,Vector{Float64}}}
 end
+const 𝑿ᵢ = Node{(:𝐼,),1}
+const 𝑿ₛ = Node{(:𝑔,:𝐺,:𝐶,:𝑠),4}
 
 function Base.getproperty(p::Node{T,N},s::Symbol) where {T,N}
     index = getfield(p,:index)

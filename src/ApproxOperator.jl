@@ -45,5 +45,5 @@ export Node, Element
 export TRElement
 export ReproducingKernel, RKGradientSmoothing, GRKGradientSmoothing
 export set𝝭!, set∇𝝭!, set∇²𝝭!
-
+export 𝑿ᵢ,𝑿ₛ
 end
