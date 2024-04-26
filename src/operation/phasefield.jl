@@ -102,7 +102,13 @@ function (op::Operator{:∫∫∇v∇vvvdxdy})(ap::T;k::AbstractMatrix{Float64},
         σ₁₁ = ξ.σ₁₁
         σ₂₂ = ξ.σ₂₂
         σ₁₂ = ξ.σ₁₂
+        v = 0.0
+        ∂v∂x = 0.0
+        ∂v∂y = 0.0
         for (i,xᵢ) in enumerate(𝓒)
+            v += N[i]*xᵢ.v
+            ∂v∂x += B₁[i]*xᵢ.v
+            ∂v∂y += B₂[i]*xᵢ.v
             ε₁₁ += B₁[i]*xᵢ.d₁
             ε₂₂ += B₂[i]*xᵢ.d₂
             ε₁₂ += B₁[i]*xᵢ.d₂ + B₂[i]*xᵢ.d₁
@@ -125,7 +131,7 @@ function (op::Operator{:∫∫∇v∇vvvdxdy})(ap::T;k::AbstractMatrix{Float64},
                 J = xⱼ.𝐼
                 k[I,J] += (kc*(2*l*(B₁[i]*B₁[j] + B₂[i]*B₂[j]) + N[i]*N[j]/2/l) + ℋₜ*N[i]*N[j])*𝑤
             end
-            f[I] += N[i]*kc/2/l*𝑤
+            f[I] += (N[i]*kc/2/l - kc*(2*l*(B₁[i]*∂v∂x + B₂[i]*∂v∂y) + N[i]*v/2/l) - ℋₜ*N[i]*v)*𝑤
         end
     end
 end
