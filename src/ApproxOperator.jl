@@ -50,9 +50,6 @@ include("operation/Mindlin_Reissner_plate.jl")
 include("operation/plasticity.jl")
 include("operation/thin_shell_penalty.jl")
 
-include("littletools.jl")
-
-
 export prescribe!
 export Operator
 export 𝑿ᵢ, 𝑿ₛ
