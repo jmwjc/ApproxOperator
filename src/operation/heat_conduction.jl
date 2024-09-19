@@ -55,7 +55,7 @@ function (op::Operator{:∫∫pᵢ∇uⱼdxdy})(aₚ::T,aᵤ::S;k::AbstractMatri
 end
 function (op::Operator{:∫∫∇𝒑udxdy})(aₚ::T,aᵤ::S;k::AbstractMatrix{Float64}) where {T<:AbstractElement,S<:AbstractElement}
     𝓒ᵤ = aᵤ.𝓒
-    𝓒ₚ = aₚ.𝓒
+    𝓒ₚ  = aₚ.𝓒
     𝓖ᵤ = aᵤ.𝓖
     𝓖ₚ = aₚ.𝓖
     for (ξᵤ,ξₚ) in zip(𝓖ᵤ,𝓖ₚ)
