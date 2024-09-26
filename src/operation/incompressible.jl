@@ -38,6 +38,27 @@ function (op::Operator{:∫∫p∇vdxdy})(aᵤ::T,aₚ::S;k::AbstractMatrix{Floa
     end
 end
 
+function (op::Operator{:∫∫p∇vdxdy2})(aᵤ::T,aₚ::S;k::AbstractMatrix{Float64}) where {T<:AbstractElement,S<:AbstractElement}
+    𝓒ᵤ = aᵤ.𝓒
+    𝓒ₚ = aₚ.𝓒
+    𝓖ᵤ = aᵤ.𝓖
+    𝓖ₚ = aₚ.𝓖
+    for (ξᵤ,ξₚ) in zip(𝓖ᵤ,𝓖ₚ)
+        N = ξₚ[:𝝭]
+        B₁ = ξᵤ[:∂𝝭∂x]
+        B₂ = ξᵤ[:∂𝝭∂y]
+        𝑤 = ξₚ.𝑤
+        for (i,xᵢ) in enumerate(𝓒ₚ)
+            I = xᵢ.𝐼
+            for (j,xⱼ) in enumerate(𝓒ᵤ)
+                J = xⱼ.𝐼
+                k[I,2*J-1] += N[i]*B₁[j]*𝑤
+                k[I,2*J]   += N[i]*B₂[j]*𝑤
+            end
+        end
+    end
+end
+
 function (op::Operator{:∫pnᵢgᵢds})(aᵤ::T,aₚ::S;k::AbstractMatrix{Float64},f::AbstractVector{Float64}) where {T<:AbstractElement,S<:AbstractElement}
     𝓒ᵤ = aᵤ.𝓒
     𝓒ₚ = aₚ.𝓒
@@ -65,6 +86,34 @@ function (op::Operator{:∫pnᵢgᵢds})(aᵤ::T,aₚ::S;k::AbstractMatrix{Float
         end
     end
 end
+function (op::Operator{:∫pnᵢgᵢds2})(aᵤ::T,aₚ::S;k::AbstractMatrix{Float64},f::AbstractVector{Float64}) where {T<:AbstractElement,S<:AbstractElement}
+    𝓒ᵤ = aᵤ.𝓒
+    𝓒ₚ = aₚ.𝓒
+    𝓖ᵤ = aᵤ.𝓖
+    𝓖ₚ = aₚ.𝓖
+    for (ξᵤ,ξₚ) in zip(𝓖ᵤ,𝓖ₚ)
+        Nₚ = ξₚ[:𝝭]
+        Nᵤ = ξᵤ[:𝝭]
+        n₁ = ξᵤ.n₁
+        n₂ = ξᵤ.n₂
+        g₁ = ξᵤ.g₁
+        g₂ = ξᵤ.g₂
+        n₁₁ = ξᵤ.n₁₁
+        n₁₂ = ξᵤ.n₁₂
+        n₂₂ = ξᵤ.n₂₂
+        𝑤 = ξₚ.𝑤
+        for (i,xᵢ) in enumerate(𝓒ₚ)
+            I = xᵢ.𝐼
+            for (j,xⱼ) in enumerate(𝓒ᵤ)
+                J = xⱼ.𝐼
+                k[I,2*J-1] -= Nₚ[i]*Nᵤ[j]*(n₁*n₁₁+n₂*n₁₂)*𝑤
+                k[I,2*J]   -= Nₚ[i]*Nᵤ[j]*(n₁*n₁₂+n₂*n₂₂)*𝑤
+            end
+            f[I] -= Nₚ[i]*(n₁*n₁₁*g₁+n₁*n₁₂*g₂+n₂*n₁₂*g₁+n₂*n₂₂*g₂)*𝑤
+        end
+    end
+end
+
 
 function (op::Operator{:∫∫δsᵢⱼsᵢⱼdxdy})(ap::T;k::AbstractMatrix{Float64}) where T<:AbstractElement
     𝓒 = ap.𝓒; 𝓖 = ap.𝓖
