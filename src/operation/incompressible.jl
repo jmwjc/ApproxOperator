@@ -95,7 +95,8 @@ function (op::Operator{:∫pnᵢgᵢds})(aᵤ::T,aₚ::S;k::AbstractMatrix{Float
         n₁₁ = ξᵤ.n₁₁
         n₁₂ = ξᵤ.n₁₂
         n₂₂ = ξᵤ.n₂₂
-        𝑤 = ξᵤ.𝑤
+        # 𝑤 = ξᵤ.𝑤
+        𝑤 = ξₚ.𝑤
         for (i,xᵢ) in enumerate(𝓒ₚ)
             I = xᵢ.𝐼
             for (j,xⱼ) in enumerate(𝓒ᵤ)
@@ -121,8 +122,8 @@ function (op::Operator{:∫pnᵢuᵢds})(aᵤ::T,aₚ::S;k::AbstractMatrix{Float
         n₁₁ = ξᵤ.n₁₁
         n₁₂ = ξᵤ.n₁₂
         n₂₂ = ξᵤ.n₂₂
-        # 𝑤 = ξₚ.𝑤
-        𝑤 = ξᵤ.𝑤
+        𝑤 = ξₚ.𝑤
+        # 𝑤 = ξᵤ.𝑤
         for (i,xᵢ) in enumerate(𝓒ₚ)
             I = xᵢ.𝐼
             for (j,xⱼ) in enumerate(𝓒ᵤ)
