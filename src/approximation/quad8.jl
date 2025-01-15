@@ -1,5 +1,5 @@
 
-function set𝝭!(::Element{ApproxOperator.Quad8},x::Node)
+function set𝝭!(::Element{:Quad8},x::Node)
     ξ = x.ξ
     η = x.η
     𝝭 = x[:𝝭]
@@ -13,7 +13,7 @@ function set𝝭!(::Element{ApproxOperator.Quad8},x::Node)
     𝝭[8] = 0.5*(1.0-ξ)  *(1.0-η^2)
 end
 
-function set∇𝝭!(ap::Element{ApproxOperator.Quad8},x::Node)
+function set∇𝝭!(ap::Element{:Quad8},x::Node)
     ξ = x.ξ
     η = x.η
     𝓒 = ap.𝓒
@@ -59,7 +59,7 @@ function set∇𝝭!(ap::Element{ApproxOperator.Quad8},x::Node)
     ∂𝝭∂y[8] = ∂N₈∂ξ*∂ξ∂y + ∂N₈∂η*∂η∂y
 end
 
-function get∂𝝭∂ξ(::Element{ApproxOperator.Quad8},ξ::Float64,η::Float64)
+function get∂𝝭∂ξ(::Element{:Quad8},ξ::Float64,η::Float64)
     ∂N₁∂ξ =   0.25*(2*ξ+η)*(1-η)
     ∂N₂∂ξ =   0.25*(2*ξ-η)*(1-η)
     ∂N₃∂ξ =   0.25*(2*ξ+η)*(1+η)
@@ -71,7 +71,7 @@ function get∂𝝭∂ξ(::Element{ApproxOperator.Quad8},ξ::Float64,η::Float64
     return (∂N₁∂ξ,∂N₂∂ξ,∂N₃∂ξ,∂N₄∂ξ,∂N₅∂ξ,∂N₆∂ξ,∂N₇∂ξ,∂N₈∂ξ)
 end
 
-function get∂𝝭∂η(::Element{ApproxOperator.Quad8},ξ::Float64,η::Float64)
+function get∂𝝭∂η(::Element{:Quad8},ξ::Float64,η::Float64)
     ∂N₁∂η =   0.25*(2*η+ξ)*(1-ξ)
     ∂N₂∂η =   0.25*(2*η-ξ)*(1+ξ)
     ∂N₃∂η =   0.25*(2*η+ξ)*(1+ξ)

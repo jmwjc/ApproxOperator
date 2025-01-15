@@ -8,8 +8,8 @@ struct PiecewiseParametric{𝑝,T}<:AbstractPiecewise
     𝓖::Vector{𝑿ₛ}
 end
 
-get𝑛𝑝(::PiecewisePolynomial{:Constant1D}) = 1
-get𝑛𝑝(::PiecewiseParametric{:Constant1D}) = 1
+get𝑛𝑝(::PiecewisePolynomial{:Constant}) = 1
+get𝑛𝑝(::PiecewiseParametric{:Constant}) = 1
 get𝑛𝑝(::PiecewisePolynomial{:Linear1D}) = 2
 get𝑛𝑝(::PiecewiseParametric{:Linear1D}) = 2
 get𝑛𝑝(::PiecewisePolynomial{:Quadratic1D}) = 3
@@ -17,8 +17,6 @@ get𝑛𝑝(::PiecewiseParametric{:Quadratic1D}) = 3
 get𝑛𝑝(::PiecewisePolynomial{:Cubic1D}) = 4
 get𝑛𝑝(::PiecewiseParametric{:Cubic1D}) = 4
 
-get𝑛𝑝(::PiecewisePolynomial{:Constant2D}) = 1
-get𝑛𝑝(::PiecewiseParametric{:Constant2D}) = 1
 get𝑛𝑝(::PiecewisePolynomial{:Linear2D}) = 3
 get𝑛𝑝(::PiecewiseParametric{:Linear2D}) = 3
 get𝑛𝑝(::PiecewisePolynomial{:Quadratic2D}) = 6
@@ -31,9 +29,18 @@ get𝑛𝑝(::PiecewisePolynomial{:6}) = 28
 get𝑛𝑝(::PiecewiseParametric{:Bubble,:Tri3}) = 1
 get𝑛𝑝(::PiecewiseParametric{:Bubble,:Quad}) = 1
 
-function set𝝭!(::PiecewisePolynomial{:Constant1D},𝒙::Node)
+function set𝝭!(::PiecewisePolynomial{:Constant},𝒙::Node)
     𝝭 = 𝒙[:𝝭]
     𝝭[1] = 1.0
+end
+
+function set∇𝝭!(::PiecewisePolynomial{:Constant},𝒙::Node)
+    𝝭 = 𝒙[:𝝭]
+    ∂𝝭∂x = 𝒙[:∂𝝭∂x]
+    ∂𝝭∂y = 𝒙[:∂𝝭∂x]
+    𝝭[1] = 1.0
+    ∂𝝭∂x[1] = 0.0
+    ∂𝝭∂y[1] = 0.0
 end
 
 function set𝝭!(::PiecewisePolynomial{:Linear1D},𝒙::Node)
@@ -69,11 +76,6 @@ function set∇𝝭!(ap::PiecewisePolynomial{:Quadratic1D},𝒙::Node)
     ∂𝝭∂x[1] = 0.0
     ∂𝝭∂x[2] = 1.0
     ∂𝝭∂x[3] = 2.0*x
-end
-
-function set𝝭!(::PiecewiseParametric{:Constant1D},𝒙::Node)
-    𝝭 = 𝒙[:𝝭]
-    𝝭[1] = 1.0
 end
 
 function set𝝭!(::PiecewiseParametric{:Linear1D},𝒙::Node)
@@ -235,7 +237,7 @@ function set∇𝝭!(::PiecewisePolynomial{:Cubic2D},𝒙::Node)
     ∂𝝭∂y[9] = 2*x*y
     ∂𝝭∂y[10] = 3*y^2
 end
-function set𝝭!(::PiecewisePolynomial{:4},𝒙::Node)
+function set𝝭!(::PiecewisePolynomial{:Quartic2D},𝒙::Node)
     𝝭 = 𝒙[:𝝭]
     x = 𝒙.x
     y = 𝒙.y
@@ -256,7 +258,7 @@ function set𝝭!(::PiecewisePolynomial{:4},𝒙::Node)
     𝝭[15] = y^4
 end
 
-function set∇𝝭!(::PiecewisePolynomial{:4},𝒙::Node)
+function set∇𝝭!(::PiecewisePolynomial{:Quartic2D},𝒙::Node)
     𝝭 = 𝒙[:𝝭]
     x = 𝒙.x
     y = 𝒙.y
@@ -308,7 +310,7 @@ function set∇𝝭!(::PiecewisePolynomial{:4},𝒙::Node)
     ∂𝝭∂y[14] = 2*x^2*y
     ∂𝝭∂y[15] = 4*y^3
 end
-function set𝝭!(::PiecewisePolynomial{:5},𝒙::Node)
+function set𝝭!(::PiecewisePolynomial{:Quintic2D},𝒙::Node)
     𝝭 = 𝒙[:𝝭]
     x = 𝒙.x
     y = 𝒙.y
@@ -335,7 +337,7 @@ function set𝝭!(::PiecewisePolynomial{:5},𝒙::Node)
     𝝭[21] = y^5
 end
 
-function set∇𝝭!(::PiecewisePolynomial{:5},𝒙::Node)
+function set∇𝝭!(::PiecewisePolynomial{:Quintic2D},𝒙::Node)
     𝝭 = 𝒙[:𝝭]
     x = 𝒙.x
     y = 𝒙.y
@@ -405,7 +407,7 @@ function set∇𝝭!(::PiecewisePolynomial{:5},𝒙::Node)
     ∂𝝭∂y[20] = 4*x*y^3
     ∂𝝭∂y[21] = 5*y^4
 end
-function set𝝭!(::PiecewisePolynomial{:6},𝒙::Node)
+function set𝝭!(::PiecewisePolynomial{:Sextic2D},𝒙::Node)
     𝝭 = 𝒙[:𝝭]
     x = 𝒙.x
     y = 𝒙.y
@@ -440,7 +442,7 @@ function set𝝭!(::PiecewisePolynomial{:6},𝒙::Node)
 
 end
 
-function set∇𝝭!(::PiecewisePolynomial{:6},𝒙::Node)
+function set∇𝝭!(::PiecewisePolynomial{:Sextic2D},𝒙::Node)
     𝝭 = 𝒙[:𝝭]
     x = 𝒙.x
     y = 𝒙.y
@@ -530,11 +532,6 @@ function set∇𝝭!(::PiecewisePolynomial{:6},𝒙::Node)
     ∂𝝭∂y[26] = 4*x^2*y^3
     ∂𝝭∂y[27] = 5*x*y^4
     ∂𝝭∂y[28] = 6*y^5
-end
-
-function set𝝭!(::PiecewiseParametric{:Constant2D},𝒙::Node)
-    𝝭 = 𝒙[:𝝭]
-    𝝭[1] = 1.0
 end
 
 function set𝝭!(::PiecewiseParametric{:Linear2D,:Tri3},𝒙::Node)

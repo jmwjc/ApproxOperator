@@ -1,5 +1,5 @@
 """
-Returen value (RV)
+Return value
 
 This is a simple struct
 """
@@ -9,6 +9,7 @@ struct RV
 end
 
 getindex(r::RV,i::Int) = r.v[r.i+i]
+getindex(r::RV,is::UnitRange{Int}) = [r.v[r.i+i] for i in is]
 function setindex!(r::RV,x::Float64,i::Int)
     r.v[r.i+i] = x
 end
@@ -20,6 +21,7 @@ struct Node{T,N}
     index::NamedTuple{T,NTuple{N,Int}}
     data::Dict{Symbol,Tuple{Int,Vector{Float64}}}
 end
+
 const 𝑿ᵢ = Node{(:𝐼,),1}
 const 𝑿ₛ = Node{(:𝑔,:𝐺,:𝐶,:𝑠),4}
 
@@ -39,8 +41,8 @@ function Base.setproperty!(p::Node,s::Symbol,x::Float64)
     v[j] = x
 end
 
-function Base.getindex(p::Node,f::Symbol)
-    i,v = getfield(p,:data)[f]
+function Base.getindex(p::Node,s::Symbol)
+    i,v = getfield(p,:data)[s]
     j = getfield(p,:index)[i]
     return RV(j,v)
 end
@@ -50,16 +52,10 @@ end
 
 push!(ps::Vector{T},svs::Pair{Symbol,S}...) where {T<:Node,S} = push!(ps[1],svs...)
 
-function push!(p::Node,svs::Pair{Symbol,Vector{Float64}}...)
+function push!(p::Node{T},svs::Pair{Symbol,Vector{Float64}}...;index::Symbol=:𝐼) where T
     for (s,v) in svs
-        push!(getfield(p,:data),s=>(1,v))
-    end
-end
-
-function push!(p::Node{T},svs::Pair{Symbol,Tuple{Symbol,Vector{Float64}}}...) where T
-    for (s,(i,v)) in svs
-        index = findfirst(T,i)
-        push!(getfield(p,:data),s=>(index,v))
+        i = findfirst((x)->x==index,T)
+        push!(getfield(p,:data),s=>(i,v))
     end
 end
 
@@ -91,3 +87,4 @@ function printinfo(p::Node{S}) where S
 end
 
 Base.show(io::IO,::MIME"text/plain",p::Node) = printinfo(p)
+Base.show(io::IO,p::Node) = printinfo(p)

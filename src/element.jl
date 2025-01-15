@@ -1,4 +1,5 @@
 """
+Element{T}
 """
 struct Element{T} <: AbstractElement
     𝓒::Vector{𝑿ᵢ}
@@ -31,25 +32,72 @@ for set𝝭 in (:set𝝭!,:set∇𝝭!,:set∇²𝝭!,:set∇̂³𝝭!)
     end
 end
 
-function Base.push!(aps::Vector{T},sis::Pair{Symbol, Symbol}...) where T<:AbstractElement
-    for si in sis
-        s,i = si
-        data = getfield(aps[1].𝓖[1],:data)
-        index = getfield(aps[end].𝓖[end],:index)
-        if i ≠ :𝑠
-            j = findfirst((x)->x==i,keys(index))
-            data[s] = (j,zeros(index[i]))
-        else
-            data[s] = (4,zeros(index[:𝑠]+length(aps[end].𝓒)))
-        end
+function count(aps::Vector{T},i::Symbol) where T<:AbstractElement
+    index = getfield(aps[end].𝓖[end],:index)
+    return i ≠ :𝑠 ? index[i] : index[i]+length(aps[end].𝓒)
+end
+
+function Base.push!(aps::Vector{T},ss::Symbol...;index::Symbol=:𝑠) where T<:AbstractElement
+    data = getfield(aps[1].𝓖[1],:data)
+    indices = getfield(aps[end].𝓖[end],:index)
+    i = findfirst((x)->x==index,keys(indices))
+    n = count(aps,index)
+    for s in ss
+        data[s] = (i,zeros(n))
     end
 end
 
-function Base.push!(aps::Vector{T},svs::Pair{Symbol, Tuple{Int,Vector{Float64}}}...) where T<:AbstractElement
+function Base.push!(aps::Vector{T},svs::Pair{Symbol, Vector{Float64}}...;index::Symbol=:𝑠) where T<:AbstractElement
+    data = getfield(aps[1].𝓖[1],:data)
+    indices = getfield(aps[end].𝓖[end],:index)
+    i = findfirst((x)->x==index,keys(indices))
     for sv in svs
         s,v = sv
-        data = getfield(aps[1].𝓖[1],:data)
-        data[s] = v
+        data[s] = (i,v)
+    end
+end
+
+function prescribe!(ξ::Node,sf::Pair{Symbol,F}) where F<:Function
+    s,f = sf
+    𝒙 = (ξ.x,ξ.y,ξ.z)
+    if applicable(f,𝒙...)
+        v = f(𝒙...)
+    elseif applicable(f,𝒙...,ξ.n₁)
+        v = f(𝒙...,ξ.n₁)
+    elseif applicable(f,𝒙...,ξ.n₁,ξ.n₂)
+        v = f(𝒙...,ξ.n₁,ξ.n₂)
+    elseif applicable(f,𝒙...,ξ.n₁,ξ.n₂,ξ.n₃)
+        v = f(𝒙...,ξ.n₁,ξ.n₂,ξ.n₃)
+    end
+    setproperty!(ξ,s,v)
+end
+
+function prescribe!(aps::Vector{T},sf::Pair{Symbol,F};index::Symbol=:𝐺) where {T<:AbstractElement,F<:Function}
+    s,f = sf
+    data = getfield((aps[1].𝓖)[1],:data)
+    indices = getfield(aps[end].𝓖[end],:index)
+    n = count(aps,index)
+    i = findfirst((x)->x==index,keys(indices))
+    haskey(data,s) ? nothing : push!(data,s=>(i,zeros(n)))
+    if index == :𝑔
+        𝓖 = aps[1].𝓖
+        for ξ in 𝓖
+            prescribe!(ξ,sf)
+        end
+    elseif index == :𝐺
+        for ap in aps
+            𝓖 = ap.𝓖
+            for ξ in 𝓖
+                prescribe!(ξ,sf)
+            end
+        end
+    elseif index == :𝐶
+        for ap in aps
+            ξ = ap.𝓖[1]
+            prescribe!(ξ,sf)
+        end
+    else
+        error("prescribe error! Index is not supported.")
     end
 end
 
